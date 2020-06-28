@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Sankey from "./Sankey.svelte";
   import graph from "./graph";
 
@@ -6,7 +6,7 @@
   let height = 500;
 
   let nodePadding = 0;
-  let nodeAlign = "left";
+  let nodeAlign: "left" | "right" | "center" | "justify" | undefined = "left";
 </script>
 
 <style>

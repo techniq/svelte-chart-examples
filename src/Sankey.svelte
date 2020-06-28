@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
   import {
     sankey as d3sankey,
-    // SankeyGraph,
-    // SankeyLink,
-    // SankeyNode,
+    SankeyGraph,
+    SankeyLink,
+    SankeyNode,
     sankeyLeft,
     sankeyRight,
     sankeyCenter,
@@ -16,8 +16,12 @@
 
   import Group from "./Group.svelte";
 
-  export let width;
-  export let height;
+  // TODO: Should be generic argument to component somehow
+  type NodeDatum = any;
+  type LinkDatum = any;
+
+  export let width: number;
+  export let height: number;
   export let margin = {
     top: 0,
     left: 0,
@@ -25,19 +29,20 @@
     bottom: 0,
   };
 
-  export let graph;
+  export let graph: SankeyGraph<NodeDatum, LinkDatum>;
   export let size = undefined;
   export let nodeId = undefined;
   export let nodeAlign = undefined;
   export let nodeWidth = undefined;
-  export let nodePadding = undefined;
+  export let nodePadding: number | undefined = undefined;
   export let nodeSort = undefined;
-  export let extent = undefined;
+  export let extent: number[][] | undefined = undefined;
   export let iterations = undefined;
 
   const color = scaleSequential(interpolateCool);
 
-  let nodes, links;
+  let nodes: SankeyNode<NodeDatum, LinkDatum>;
+  let links: SankeyLink<NodeDatum, LinkDatum>;
   $: {
     const sankey = d3sankey();
 
@@ -62,12 +67,14 @@
     if (extent) sankey.extent(extent);
     if (iterations) sankey.iterations(iterations);
 
+    // @ts-ignore
     const data = sankey(graph);
     nodes = data.nodes;
     links = data.links;
 
     // Set color domain after sankey() has set depth
-    color.domain(d3Extent(nodes, (d) => d.depth));
+    // @ts-ignore
+    color.domain(d3Extent(nodes, (d: any) => d.depth));
   }
 
   const path = linkHorizontal()
@@ -86,7 +93,6 @@
     <g>
       {#each links as link, i (`link-${i}`)}
         <path
-          key={`link-${i}`}
           d={path(link) || undefined}
           stroke={highlightLinkIndexes.includes(i) ? 'red' : 'black'}
           stroke-width={Math.max(1, link.width)}
